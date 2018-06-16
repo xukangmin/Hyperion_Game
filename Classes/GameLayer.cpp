@@ -122,7 +122,7 @@ void GameLayer::onTouchEnded(Touch *touch, Event *event){
   CCLOG("target .x=%f,.y=%f", target.x, target.y);
 
   _player->setTarget(target);
- 
+
   float x_add = - (tap.x - _screenSize.width / 2) / 10;
   float y_add = - (tap.y - _screenSize.height / 2) / 10;
 
@@ -132,13 +132,84 @@ void GameLayer::onTouchEnded(Touch *touch, Event *event){
   int bottom_left_point_covered = 0;
   int bottom_right_point_covered = 0;
 
-  for (int i = 0; i < _bg.size(); i++)
-  {
-	  _bg.at(i)->getPositionX();
-  }
+  float current_bg_x = 0;
+  float current_bg_y = 0;
+
+
 
   for (auto bg : _bg) {
-	  bg->setPosition(bg->getPositionX() - (tap.x - _screenSize.width / 2) / 10, bg->getPositionY() - (tap.y - _screenSize.height / 2) / 10);
+	  all_in = 0;
+	  if (fabs(bg->getPositionX() + x_add) <= bg->getBoundingBox().size.width / 2 &&
+		  fabs(bg->getPositionY() + y_add - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
+		  top_left_point_covered = 1;
+		  all_in++;
+	  }
+
+	  if (fabs(bg->getPositionX() + x_add - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
+		  fabs(bg->getPositionY() + y_add - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
+		  top_right_point_covered = 1;
+		  all_in++;
+	  }
+
+	  if (fabs(bg->getPositionX() + x_add) <= bg->getBoundingBox().size.width / 2 &&
+		  fabs(bg->getPositionY() + y_add) <= bg->getBoundingBox().size.height / 2) {
+		  bottom_left_point_covered = 1;
+		  all_in++;
+	  }
+
+	  if (fabs(bg->getPositionX() + x_add - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
+		  fabs(bg->getPositionY() + y_add) <= bg->getBoundingBox().size.height / 2) {
+		  bottom_right_point_covered = 1;
+		  all_in++;
+	  }
+
+	  if (fabs(bg->getPositionX() - _screenSize.width / 2 ) <= bg->getBoundingBox().size.width / 2 &&
+		  fabs(bg->getPositionY() - _screenSize.height / 2) <= bg->getBoundingBox().size.height / 2) {
+		  current_bg_x = bg->getPositionX();
+		  current_bg_y = bg->getPositionY();
+	  }
+  }
+
+  if (top_left_point_covered == 0 && top_right_point_covered == 0 &&
+	  bottom_left_point_covered == 1 && bottom_right_point_covered == 1) {
+	  // add a bg to top
+	  auto bg = Sprite::create("star_bg.jpg");
+	  bg->setPosition(Vec2(current_bg_x, current_bg_y + bg->getBoundingBox().size.height));
+	  this->addChild(bg, kBackground, kSpriteBg);
+	  _bg.pushBack(bg);
+  }
+
+  if (top_left_point_covered == 1 && top_right_point_covered == 1 &&
+	  bottom_left_point_covered == 0 && bottom_right_point_covered == 0) {
+	  // add a bg to bottom
+	  auto bg = Sprite::create("star_bg.jpg");
+	  bg->setPosition(Vec2(current_bg_x, current_bg_y - bg->getBoundingBox().size.height));
+	  this->addChild(bg, kBackground, kSpriteBg);
+	  _bg.pushBack(bg);
+  }
+
+  if (top_left_point_covered == 1 && top_right_point_covered == 0 &&
+	  bottom_left_point_covered == 1 && bottom_right_point_covered == 0) {
+	  // add a bg to right
+	  auto bg = Sprite::create("star_bg.jpg");
+	  bg->setPosition(Vec2(current_bg_x + bg->getBoundingBox().size.width, current_bg_y));
+	  this->addChild(bg, kBackground, kSpriteBg);
+	  _bg.pushBack(bg);
+  }
+
+  if (top_left_point_covered == 0 && top_right_point_covered == 1 &&
+	  bottom_left_point_covered == 0 && bottom_right_point_covered == 1) {
+	  // add a bg to left
+	  auto bg = Sprite::create("star_bg.jpg");
+	  bg->setPosition(Vec2(current_bg_x - bg->getBoundingBox().size.width, current_bg_y));
+	  this->addChild(bg, kBackground, kSpriteBg);
+	  _bg.pushBack(bg);
+  }
+
+  CCLOG("tf=%d, tr=%d, bl=%d, br=%d", top_left_point_covered, top_right_point_covered, bottom_left_point_covered, bottom_right_point_covered);
+
+  for (auto bg : _bg) {
+	  bg->setPosition(bg->getPositionX() + x_add, bg->getPositionY() + y_add);
   }
 }
 
