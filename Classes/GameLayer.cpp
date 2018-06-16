@@ -19,50 +19,50 @@ static void problemLoading(const char* filename)
 // on "init" you need to initialize your instance
 bool GameLayer::init()
 {
-    //////////////////////////////
-    // 1. super init first
-    if ( !Scene::init() )
-    {
-        return false;
-    }
+	//////////////////////////////
+	// 1. super init first
+	if (!Scene::init())
+	{
+		return false;
+	}
 
-    _screenSize = Director::getInstance()->getVisibleSize();
+	_screenSize = Director::getInstance()->getVisibleSize();
 
-    Vec2 origin = Director::getInstance()->getVisibleOrigin();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
 
-    /////////////////////////////
-    // 2. add a menu item with "X" image, which is clicked to quit the program
-    //    you may modify it.
+	/////////////////////////////
+	// 2. add a menu item with "X" image, which is clicked to quit the program
+	//    you may modify it.
 
-    // add a "close" icon to exit the progress. it's an autorelease object
-    auto closeItem = MenuItemImage::create(
-                                           "CloseNormal.png",
-                                           "CloseSelected.png",
-                                           CC_CALLBACK_1(GameLayer::menuCloseCallback, this));
+	// add a "close" icon to exit the progress. it's an autorelease object
+	auto closeItem = MenuItemImage::create(
+		"CloseNormal.png",
+		"CloseSelected.png",
+		CC_CALLBACK_1(GameLayer::menuCloseCallback, this));
 
-    if (closeItem == nullptr ||
-        closeItem->getContentSize().width <= 0 ||
-        closeItem->getContentSize().height <= 0)
-    {
-        problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
-    }
-    else
-    {
-        float x = origin.x + _screenSize.width - closeItem->getContentSize().width/2;
-        float y = origin.y + closeItem->getContentSize().height/2;
-        closeItem->setPosition(Vec2(x,y));
-    }
+	if (closeItem == nullptr ||
+		closeItem->getContentSize().width <= 0 ||
+		closeItem->getContentSize().height <= 0)
+	{
+		problemLoading("'CloseNormal.png' and 'CloseSelected.png'");
+	}
+	else
+	{
+		float x = origin.x + _screenSize.width - closeItem->getContentSize().width / 2;
+		float y = origin.y + closeItem->getContentSize().height / 2;
+		closeItem->setPosition(Vec2(x, y));
+	}
 
-    // create menu, it's an autorelease object
-    auto menu = Menu::create(closeItem, NULL);
-    menu->setPosition(Vec2::ZERO);
-    this->addChild(menu, 1);
+	// create menu, it's an autorelease object
+	auto menu = Menu::create(closeItem, NULL);
+	menu->setPosition(Vec2::ZERO);
+	this->addChild(menu, 1);
 
-    /////////////////////////////
-    // 3. add your codes below...
-    auto bg = Sprite::create("star_bg.jpg");
-    bg->setPosition(Vec2(_screenSize.width/2 + origin.x, _screenSize.height/2 + origin.y));
-    this->addChild(bg, kBackground, kSpriteBg);
+	auto bg = Sprite::create("star_bg.jpg");
+	bg->setPosition(Vec2(_screenSize.width / 2 + origin.x, _screenSize.height / 2 + origin.y));
+	this->addChild(bg, kBackground, kSpriteBg);
+
+	_bg.pushBack(bg);
 
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("sprite_sheet.plist");
     _gameBatchNode = SpriteBatchNode::create("sprite_sheet.png", 100);
@@ -74,11 +74,6 @@ bool GameLayer::init()
     _player->setPosition(Vec2(_screenSize.width * 0.5f, _screenSize.height * 0.5f));
     _gameBatchNode->addChild(_player, kForeground, kSpritePlayer);
 
-//    auto voidNode = ParallaxNode::create();
-
-//    voidNode->addChild(bg, -1, Vec2(0.5f,0.5f), Vec2::ZERO);
-
-  //  this->addChild(voidNode, kBackground, kSpriteBg);
 
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
@@ -87,8 +82,7 @@ bool GameLayer::init()
     listener->onTouchEnded = CC_CALLBACK_2(GameLayer::onTouchEnded, this);
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 
-    //create main loop
-    this->scheduleUpdate();
+	this->scheduleUpdate();
 
     return true;
 }
@@ -111,17 +105,7 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event){
 void GameLayer::onTouchMoved(Touch *touch, Event *event){
     Point tap = touch->getLocation();
 
-    CCLOG("onTouchMoved tap.x=%f,tap.y=%f", tap.x, tap.y);
-    auto node = getChildByTag(kSpriteBg);
-    auto currentPos = node->getPosition();
 
-    CCLOG("currentPos.x=%f,currentPos.y=%f:",currentPos.x,currentPos.y);
-
-    currentPos.x -= (tap.x - _screenSize.width / 2) / 100;
-    currentPos.y -= (tap.y - _screenSize.height / 2) / 100;
-
-    CCLOG("currentPos.x=%f,currentPos.y=%f:",currentPos.x,currentPos.y);
-    node->setPosition(currentPos);
 
 }
 
@@ -138,7 +122,24 @@ void GameLayer::onTouchEnded(Touch *touch, Event *event){
   CCLOG("target .x=%f,.y=%f", target.x, target.y);
 
   _player->setTarget(target);
+ 
+  float x_add = - (tap.x - _screenSize.width / 2) / 10;
+  float y_add = - (tap.y - _screenSize.height / 2) / 10;
 
+  int all_in = 0;
+  int top_left_point_covered = 0;
+  int top_right_point_covered = 0;
+  int bottom_left_point_covered = 0;
+  int bottom_right_point_covered = 0;
+
+  for (int i = 0; i < _bg.size(); i++)
+  {
+	  _bg.at(i)->getPositionX();
+  }
+
+  for (auto bg : _bg) {
+	  bg->setPosition(bg->getPositionX() - (tap.x - _screenSize.width / 2) / 10, bg->getPositionY() - (tap.y - _screenSize.height / 2) / 10);
+  }
 }
 
 void GameLayer::menuCloseCallback(Ref* pSender)
