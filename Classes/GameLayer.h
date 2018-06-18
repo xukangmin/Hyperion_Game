@@ -56,6 +56,9 @@ public:
 
     // implement the "static create()" method manually
     CREATE_FUNC(GameLayer);
+private:
+	bool Check_bg_exists(Vec2 in_pt);
+
 };
 
 #endif // __HELLOWORLD_SCENE_H__
