@@ -58,11 +58,9 @@ bool GameLayer::init()
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 1);
 
-	auto bg = Sprite::create("star_bg.jpg");
-	bg->setPosition(Vec2(_screenSize.width / 2 + origin.x, _screenSize.height / 2 + origin.y));
-	this->addChild(bg, kBackground, kSpriteBg);
+	initBG();
 
-	_bg.pushBack(bg);
+
 
     SpriteFrameCache::getInstance()->addSpriteFramesWithFile("sprite_sheet.plist");
     _gameBatchNode = SpriteBatchNode::create("sprite_sheet.png", 100);
@@ -74,6 +72,7 @@ bool GameLayer::init()
     _player->setPosition(Vec2(_screenSize.width * 0.5f, _screenSize.height * 0.5f));
     _gameBatchNode->addChild(_player, kForeground, kSpritePlayer);
 
+	createParticles();
 
     auto listener = EventListenerTouchOneByOne::create();
     listener->setSwallowTouches(true);
@@ -90,7 +89,17 @@ bool GameLayer::init()
 void GameLayer::update (float dt) {
 
   //  if (_player.getPos().x - _player.)
+	float speed = 2;
 
+	if (target_dis > 0) {
+		Vec2 vec = speed * target_dir;
+		move_self(vec);
+		target_dis -= vec.getLength();
+		if (!_jet->isActive()) _jet->resetSystem();
+	}
+	else {
+		if (_jet->isActive()) _jet->stopSystem();
+	}
 }
 
 bool GameLayer::onTouchBegan(Touch *touch, Event *event){
@@ -98,7 +107,7 @@ bool GameLayer::onTouchBegan(Touch *touch, Event *event){
   Point tap = touch->getLocation();
 
   CCLOG("onTouchBegan tap.x=%f,tap.y=%f", tap.x, tap.y);
-
+	// start rotate
     return true;
 }
 
@@ -120,10 +129,239 @@ bool GameLayer::Check_bg_exists(Vec2 in_pt) {
 	return exist;
 }
 
+void GameLayer::addBGs(Vec2 current_bg_pos, int top_left_point_covered, int top_right_point_covered, int bottom_left_point_covered, int bottom_right_point_covered) {
+	float _to_add_x;
+	float _to_add_y;
+
+	if (top_left_point_covered == 0) {
+		_to_add_x = current_bg_pos.x;
+		_to_add_y = current_bg_pos.y + _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x - _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x - _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y + _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+	}
+
+	if (top_right_point_covered == 0) {
+		_to_add_x = current_bg_pos.x;
+		_to_add_y = current_bg_pos.y + _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x + _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x + _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y + _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+	}
+
+
+	if (bottom_right_point_covered == 0) {
+		_to_add_x = current_bg_pos.x;
+		_to_add_y = current_bg_pos.y - _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x + _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x + _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y - _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+	}
+
+	if (bottom_left_point_covered == 0) {
+		_to_add_x = current_bg_pos.x;
+		_to_add_y = current_bg_pos.y - _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x - _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+
+		_to_add_x = current_bg_pos.x - _bg.at(0)->getBoundingBox().size.width;
+		_to_add_y = current_bg_pos.y - _bg.at(0)->getBoundingBox().size.height;
+
+		if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
+			auto bg = Sprite::create("star_bg.jpg");
+			bg->setPosition(Vec2(_to_add_x, _to_add_y));
+			this->addChild(bg, kBackground, kSpriteBg);
+			_bg.pushBack(bg);
+		}
+	}
+}
+
+void GameLayer::move_self(Vec2 player_vec) {
+	int all_in = 0;
+	int top_left_point_covered = 0;
+	int top_right_point_covered = 0;
+	int bottom_left_point_covered = 0;
+	int bottom_right_point_covered = 0;
+
+	float current_bg_x = 0;
+	float current_bg_y = 0;
+
+	float all_in_bg_pos_x = 0;
+	float all_in_bg_pos_y = 0;
+
+	std::vector<Vec2> pt_to_erase;
+
+	for (auto bg : _bg) {
+		all_in = 0;
+		if (fabs(bg->getPositionX() + player_vec.x) <= bg->getBoundingBox().size.width / 2 &&
+			fabs(bg->getPositionY() + player_vec.y - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
+			top_left_point_covered = 1;
+			all_in++;
+		}
+
+		if (fabs(bg->getPositionX() + player_vec.x - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
+			fabs(bg->getPositionY() + player_vec.y - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
+			top_right_point_covered = 1;
+			all_in++;
+		}
+
+		if (fabs(bg->getPositionX() + player_vec.x) <= bg->getBoundingBox().size.width / 2 &&
+			fabs(bg->getPositionY() + player_vec.y) <= bg->getBoundingBox().size.height / 2) {
+			bottom_left_point_covered = 1;
+			all_in++;
+		}
+
+		if (fabs(bg->getPositionX() + player_vec.x - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
+			fabs(bg->getPositionY() + player_vec.y) <= bg->getBoundingBox().size.height / 2) {
+			bottom_right_point_covered = 1;
+			all_in++;
+		}
+
+		if (fabs(bg->getPositionX() - _screenSize.width / 2) <= bg->getBoundingBox().size.width / 2 &&
+			fabs(bg->getPositionY() - _screenSize.height / 2) <= bg->getBoundingBox().size.height / 2) {
+			current_bg_x = bg->getPositionX();
+			current_bg_y = bg->getPositionY();
+		}
+
+		if (all_in == 0) {
+			pt_to_erase.push_back(bg->getPosition());
+		}
+	}
+
+	for (int i = 0; i < _bg.size(); i++) {
+		for (auto v : pt_to_erase) {
+			if (v == _bg.at(i)->getPosition()) {
+				_bg.erase(i);
+				break;
+			}
+		}
+	}
+
+	addBGs(Vec2(current_bg_x, current_bg_y), top_left_point_covered,
+		   top_right_point_covered,
+		   bottom_left_point_covered,
+		   bottom_right_point_covered);
+
+	for (auto bg : _bg) {
+		bg->setPosition(bg->getPositionX() + player_vec.x, bg->getPositionY() + player_vec.y);
+	}
+}
+
+
+void GameLayer::createParticles() {
+
+	_jet = ParticleSystemQuad::create("jet.plist");
+	_jet->setPosition(Vec2(_screenSize.width / 2, _screenSize.height / 2 - _player->getBoundingBox().size.height * 0.8));
+	_jet->setAngle(-90);
+	_jet->stopSystem();
+	this->addChild(_jet, kForeground);
+
+}
+
+void GameLayer::initBG() {
+
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	auto bg = Sprite::create("star_bg.jpg");
+	bg->setPosition(Vec2(_screenSize.width / 2 + origin.x, _screenSize.height / 2 + origin.y));
+	this->addChild(bg, kBackground, kSpriteBg);
+
+	_bg.pushBack(bg);
+
+
+}
+
 void GameLayer::onTouchEnded(Touch *touch, Event *event){
 
   Point tap = touch->getLocation();
-
+  
   CCLOG("onTouchEnded tap.x=%f,tap.y=%f", tap.x, tap.y);
 
   Point cur_pos = _player->getPos();
@@ -137,219 +375,38 @@ void GameLayer::onTouchEnded(Touch *touch, Event *event){
   float x_add = - (tap.x - _screenSize.width / 2) / 10;
   float y_add = - (tap.y - _screenSize.height / 2) / 10;
 
-  int all_in = 0;
-  int top_left_point_covered = 0;
-  int top_right_point_covered = 0;
-  int bottom_left_point_covered = 0;
-  int bottom_right_point_covered = 0;
-
-  float current_bg_x = 0;
-  float current_bg_y = 0;
-
-  float all_in_bg_pos_x = 0;
-  float all_in_bg_pos_y = 0;
-
-  std::vector<Vec2> pt_to_erase;
-
-  for (auto bg : _bg) {
-	  all_in = 0;
-	  if (fabs(bg->getPositionX() + x_add) <= bg->getBoundingBox().size.width / 2 &&
-		  fabs(bg->getPositionY() + y_add - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
-		  top_left_point_covered = 1;
-		  all_in++;
-	  }
-
-	  if (fabs(bg->getPositionX() + x_add - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
-		  fabs(bg->getPositionY() + y_add - _screenSize.height) <= bg->getBoundingBox().size.height / 2) {
-		  top_right_point_covered = 1;
-		  all_in++;
-	  }
-
-	  if (fabs(bg->getPositionX() + x_add) <= bg->getBoundingBox().size.width / 2 &&
-		  fabs(bg->getPositionY() + y_add) <= bg->getBoundingBox().size.height / 2) {
-		  bottom_left_point_covered = 1;
-		  all_in++;
-	  }
-
-	  if (fabs(bg->getPositionX() + x_add - _screenSize.width) <= bg->getBoundingBox().size.width / 2 &&
-		  fabs(bg->getPositionY() + y_add) <= bg->getBoundingBox().size.height / 2) {
-		  bottom_right_point_covered = 1;
-		  all_in++;
-	  }
-
-	  if (fabs(bg->getPositionX() - _screenSize.width / 2 ) <= bg->getBoundingBox().size.width / 2 &&
-		  fabs(bg->getPositionY() - _screenSize.height / 2) <= bg->getBoundingBox().size.height / 2) {
-		  current_bg_x = bg->getPositionX();
-		  current_bg_y = bg->getPositionY();
-	  }
-	  CCLOG("all_in=%d", all_in);
-
-//	  if (all_in == 4) {
-//		all_in_bg_pos_x = bg->getPositionX();
-//		all_in_bg_pos_y = bg->getPositionY();
-//	  }
-	  if (all_in == 0) {
-		  pt_to_erase.push_back(bg->getPosition());
-	  }
-  }
+  //move_self(Vec2(x_add, y_add));
   
-	for (int i = 0; i < _bg.size(); i++) {
-		for (auto v : pt_to_erase) {
-			if (v == _bg.at(i)->getPosition()) {
-				_bg.erase(i);
-				break;
-			}
-		}
-	}
+  CCLOG("x_add=%f,y_add=%f", x_add, y_add);
 
-  // if all in, remove other bgs
-  //if (all_in_bg_pos_x != 0 && all_in_bg_pos_y != 0)
-  //{
-	 // for (int i = 0; i < _bg.size(); i++) {
-		//  if (!(all_in_bg_pos_x == _bg.at(i)->getPositionX() && all_in_bg_pos_y == _bg.at(i)->getPositionY())) {
-		//	  _bg.erase(i);
-		//  }
-	 // }
-  //}
+  Vec2 p1 = Vec2(_screenSize.width / 2, _screenSize.height / 2);
+  Vec2 p2 = Vec2(tap.x, tap.y);
 
-  float _to_add_x;
-  float _to_add_y;
+  target_dis = p1.getDistance(p2);
+  CCLOG("target_dis=%f", target_dis);
+  target_dir = Vec2(p1 - p2).getNormalized();
+  CCLOG("x_add=%f,y_add=%f", target_dir.x, target_dir.y);
 
-  if (top_left_point_covered == 0) {
-	  _to_add_x = current_bg_x;
-	  _to_add_y = current_bg_y + _bg.at(0)->getBoundingBox().size.height;
+  float angle = (float)CC_RADIANS_TO_DEGREES(atan(target_dir.y / target_dir.x));
 
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
+  CCLOG("angle=%f", angle);
 
-	  _to_add_x = current_bg_x - _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x - _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y + _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
+  if (target_dir.x < 0) {
+	  angle = 90 - angle;
+  }
+  else {
+	  angle = - angle - 90;
   }
 
-  if (top_right_point_covered == 0) {
-	  _to_add_x = current_bg_x;
-	  _to_add_y = current_bg_y + _bg.at(0)->getBoundingBox().size.height;
+  CCLOG("angle_after=%f", angle);
 
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
+  _player->setRotation(angle);
 
-	  _to_add_x = current_bg_x + _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y;
+  Vec2 jet_pos = p1 + target_dir * _player->getBoundingBox().size.width * 0.5;
+  CCLOG("jet_pos.x=%f,jet_pos.y=%f", jet_pos.x, jet_pos.y);
+  _jet->setPosition(jet_pos);
+  _jet->setRotation(angle);
 
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x + _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y + _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-  }
-
-
-  if (bottom_right_point_covered == 0) {
-	  _to_add_x = current_bg_x;
-	  _to_add_y = current_bg_y - _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x + _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x + _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y - _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-  }
-
-  if (bottom_left_point_covered == 0) {
-	  _to_add_x = current_bg_x;
-	  _to_add_y = current_bg_y - _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x - _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-
-	  _to_add_x = current_bg_x - _bg.at(0)->getBoundingBox().size.width;
-	  _to_add_y = current_bg_y - _bg.at(0)->getBoundingBox().size.height;
-
-	  if (Check_bg_exists(Vec2(_to_add_x, _to_add_y)) == false) {
-		  auto bg = Sprite::create("star_bg.jpg");
-		  bg->setPosition(Vec2(_to_add_x, _to_add_y));
-		  this->addChild(bg, kBackground, kSpriteBg);
-		  _bg.pushBack(bg);
-	  }
-  }
-
-  CCLOG("tf=%d, tr=%d, bl=%d, br=%d", top_left_point_covered, top_right_point_covered, bottom_left_point_covered, bottom_right_point_covered);
-  CCLOG("bg.size=%d", _bg.size());
-
-  for (auto bg : _bg) {
-	  bg->setPosition(bg->getPositionX() + x_add, bg->getPositionY() + y_add);
-  }
 }
 
 void GameLayer::menuCloseCallback(Ref* pSender)

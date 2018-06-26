@@ -41,6 +41,21 @@ class GameLayer : public cocos2d::Scene
     
 	Vector<Sprite *> _bg;
 
+	bool Check_bg_exists(Vec2 in_pt);
+
+	void move_self(Vec2 vec);
+
+	float target_dis;
+
+	Vec2 target_dir;
+
+	ParticleSystem * _jet;
+
+	void createParticles(void);
+
+	void initBG(void);
+
+	void addBGs(Vec2 current_bg_pos, int top_left_point_covered, int top_right_point_covered, int bottom_left_point_covered, int bottom_right_point_covered);
 public:
     static cocos2d::Scene* createScene();
 
@@ -56,8 +71,7 @@ public:
 
     // implement the "static create()" method manually
     CREATE_FUNC(GameLayer);
-private:
-	bool Check_bg_exists(Vec2 in_pt);
+
 
 };
 

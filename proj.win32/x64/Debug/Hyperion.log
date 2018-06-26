@@ -1,0 +1,10 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\Microsoft.Common.CurrentVersion.targets(1877,5): warning : The referenced project '..\cocos2d\external\Box2D\proj.win32\libbox2d.vcxproj' does not exist.
+  AppDelegate.cpp
+  GameLayer.cpp
+  GameSprite.cpp
+  Player.cpp
+d:\cocos2d_projects\hyperion\classes\gamesprite.cpp(7): warning C4996: 'cocos2d::Node::boundingBox': was declared deprecated
+  d:\cocos2d_projects\hyperion\cocos2d\cocos\2d\ccnode.h(1200): note: see declaration of 'cocos2d::Node::boundingBox'
+  DBHandler.cpp
+  main.cpp
+LINK : fatal error LNK1104: cannot open file 'libcurl.lib'
